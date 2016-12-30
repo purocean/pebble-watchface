@@ -1,16 +1,18 @@
 var rocky = require('rocky');
 
+var DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
 // An object to cache our date & time values,
 // to minimize computations in the draw handler.
 var clockData = {
   time: '',
   date: '',
   timestamp: '',
+  weekday: '',
 };
 
-
 // https://developer.pebble.com/docs/rockyjs/rocky/#on
-rocky.on('secondchange', function(event) {
+rocky.on('minutechange', function(event) {
   // Current date/time
   // https://developer.pebble.com/docs/rockyjs/Date/
   var d = event.date;
@@ -19,13 +21,16 @@ rocky.on('secondchange', function(event) {
   clockData.time = d.toLocaleTimeString().replace(/:\d+($| )/, '$1');
 
   // Day of month
-  var day = d.toLocaleDateString(undefined, ({day: 'numeric'}));
+  var day = d.toLocaleDateString(undefined, {day: 'numeric'});
 
   // Month name
-  var month = d.toLocaleDateString(undefined, ({month: 'long'}));
+  var month = d.toLocaleDateString(undefined, {month: 'long'});
 
   // Date
   clockData.date = (day + ' ' + month);
+
+  // weekday
+  clockData.weekday = DAY_NAMES[d.getDay()];
 
   // Timestamp
   clockData.timestamp = ~~(d.getTime() / 1000);
@@ -36,38 +41,43 @@ rocky.on('secondchange', function(event) {
 
 // Redraw the screen
 rocky.on('draw', function(event) {
-  // Drawing canvas
   var ctx = event.context;
 
-  // Clear the canvas
-  // https://developer.pebble.com/docs/rockyjs/CanvasRenderingContext2D/#Canvas
-  ctx.clearRect(0, 0, ctx.canvas.clientWidth, ctx.canvas.clientHeight);
+  var cw = ctx.canvas.clientWidth;
+  var ch = ctx.canvas.clientHeight;
+  var vw = ctx.canvas.unobstructedWidth;
+  var vh = ctx.canvas.unobstructedHeight;
 
-  // UnobstructedArea
-  // https://developer.pebble.com/docs/rockyjs/CanvasRenderingContext2D/#Canvas
-  var offsetY = (ctx.canvas.clientHeight - ctx.canvas.unobstructedHeight) / 2;
-  var centerX = ctx.canvas.unobstructedWidth / 2;
+  ctx.clearRect(0, 0, cw, ch);
 
-  // Text formatting
+  var offsetY = (ch - vh) / 2;
+  var centerX = vw / 2;
+
   ctx.fillStyle = 'white';
-  ctx.textAlign = 'center';
-
-  // Time font
-  // https://developer.pebble.com/docs/rockyjs/CanvasRenderingContext2D/#font
-  ctx.font = '26px bold Gothic';
-
-  ctx.font = '26px bold Leco-numbers-am-pm';
-  // Time
-  ctx.fillText(clockData.time, centerX, (66 - offsetY));
-
-  // Date font
-  ctx.font = '18px bold Gothic';
-
-  // Date
-  ctx.fillText(clockData.date, centerX, (94 - offsetY));
 
   // Timestamp
-  ctx.fillText(clockData.timestamp, centerX, (116 - offsetY));
+  ctx.textAlign = 'left';
+  ctx.font = '14px Gothic';
+  ctx.fillText(clockData.timestamp, 6, 6);
+
+  // Date
+  ctx.textAlign = 'left';
+  ctx.font = '18px bold Gothic';
+  ctx.fillText(clockData.date, 6, ch - 72 - offsetY);
+
+  // Weekday
+  ctx.textAlign = 'right';
+  ctx.font = '14px bold Gothic';
+  ctx.fillText(clockData.weekday, vw - 6, ch - 68 - offsetY);
+
+  // Line
+  ctx.rect(6, ch - 50 - offsetY, vw - 12, 2);
+  ctx.fill();
+
+  // Time
+  ctx.textAlign = 'center';
+  ctx.font = '49px Roboto-subset';
+  ctx.fillText(clockData.time, centerX, ch - 60 - offsetY);
 });
 
 
