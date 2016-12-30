@@ -50,7 +50,7 @@ rocky.on('draw', function(event) {
 
   ctx.clearRect(0, 0, cw, ch);
 
-  var offsetY = (ch - vh) / 2;
+  var offsetY = ch - vh;
   var centerX = vw / 2;
 
   ctx.fillStyle = 'white';
@@ -58,26 +58,26 @@ rocky.on('draw', function(event) {
   // Timestamp
   ctx.textAlign = 'left';
   ctx.font = '14px Gothic';
-  ctx.fillText(clockData.timestamp, 6, 6);
+  ctx.fillText(clockData.timestamp, 6, 6 - offsetY);
 
   // Date
   ctx.textAlign = 'left';
   ctx.font = '18px bold Gothic';
-  ctx.fillText(clockData.date, 6, ch - 72 - offsetY);
+  ctx.fillText(clockData.date, 6, vh - 62);
 
   // Weekday
   ctx.textAlign = 'right';
   ctx.font = '14px bold Gothic';
-  ctx.fillText(clockData.weekday, vw - 6, ch - 68 - offsetY);
+  ctx.fillText(clockData.weekday, vw - 6, vh - 58);
 
   // Line
-  ctx.rect(6, ch - 50 - offsetY, vw - 12, 2);
+  ctx.rect(6, vh - 40, vw - 12, 2);
   ctx.fill();
 
   // Time
   ctx.textAlign = 'center';
   ctx.font = '49px Roboto-subset';
-  ctx.fillText(clockData.time, centerX, ch - 60 - offsetY);
+  ctx.fillText(clockData.time, centerX, vh - 50);
 });
 
 
