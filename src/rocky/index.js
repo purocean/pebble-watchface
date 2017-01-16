@@ -63,21 +63,21 @@ rocky.on('draw', function(event) {
   // Date
   ctx.textAlign = 'left';
   ctx.font = '18px bold Gothic';
-  ctx.fillText(clockData.date, 6, vh - 62);
+  ctx.fillText(clockData.date, 6, vh - 92);
 
   // Weekday
   ctx.textAlign = 'right';
   ctx.font = '14px bold Gothic';
-  ctx.fillText(clockData.weekday, vw - 6, vh - 58);
+  ctx.fillText(clockData.weekday, vw - 6, vh - 88);
 
   // Line
-  ctx.rect(6, vh - 40, vw - 12, 2);
+  ctx.rect(6, vh - 70, vw - 12, 2);
   ctx.fill();
 
   // Time
   ctx.textAlign = 'center';
   ctx.font = '49px Roboto-subset';
-  ctx.fillText(clockData.time, centerX, vh - 50);
+  ctx.fillText(clockData.time, centerX, vh - 80);
 });
 
 
