@@ -6,18 +6,22 @@
   "private": true,
   "dependencies": {},
   "pebble": {
-    "main": {
-      "rockyjs": "src/rocky/index.js",
-      "pkjs": "src/pkjs/index.js"
-    },
     "displayName": "自用表盘",
     "uuid": "864b6a27-5b77-48e1-9a8f-372112bc8dbd",
-    "projectType": "rocky",
     "sdkVersion": "3",
     "enableMultiJS": true,
+    "targetPlatforms": [
+      "aplite",
+      "basalt",
+      "chalk",
+      "diorite"
+    ],
     "watchapp": {
       "watchface": true
     },
+    "messageKeys": [
+      "dummy"
+    ],
     "resources": {
       "media": []
     }
