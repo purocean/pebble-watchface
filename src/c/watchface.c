@@ -5,6 +5,7 @@ static const int16_t S_Y_DATE      = -92;
 static const int16_t S_Y_LINE      = -70;
 static const int16_t S_Y_DAY       = -88;
 static const int16_t S_Y_TIMESTAMP = 6;
+static const int16_t S_Y_STATE     = 6;
 
 static GRect s_bounds;
 static Window    *s_window;
@@ -14,10 +15,11 @@ static TextLayer *s_time_layer;
 static TextLayer *s_date_layer;
 static TextLayer *s_day_layer;
 static TextLayer *s_timestamp_layer;
+static TextLayer *s_state_layer;
 
 static int16_t get_y(int16_t y) {
   GRect unobstructed_bounds = layer_get_unobstructed_bounds(s_window_layer);
-  int16_t offset = (unobstructed_bounds.size.h - s_bounds.size.h) / 4;
+  int16_t offset = (unobstructed_bounds.size.h - s_bounds.size.h);
 
   if (y >= 0) {
     return y + offset;
@@ -48,10 +50,6 @@ static void update_time() {
 }
 
 static void update_offset() {
-  GRect timestamp_frame = layer_get_frame(text_layer_get_layer(s_timestamp_layer));
-  timestamp_frame.origin.y = get_y(S_Y_TIMESTAMP);
-  layer_set_frame(text_layer_get_layer(s_timestamp_layer), timestamp_frame);
-
   GRect date_frame = layer_get_frame(text_layer_get_layer(s_date_layer));
   date_frame.origin.y = get_y(S_Y_DATE);
   layer_set_frame(text_layer_get_layer(s_date_layer), date_frame);
@@ -63,6 +61,15 @@ static void update_offset() {
   GRect time_frame = layer_get_frame(text_layer_get_layer(s_time_layer));
   time_frame.origin.y = get_y(S_Y_TIME);
   layer_set_frame(text_layer_get_layer(s_time_layer), time_frame);
+}
+
+static void bluetooth_callback(bool connected) {
+  if (!connected) {
+    vibes_long_pulse();
+    text_layer_set_text(s_state_layer, "EC");
+  } else {
+    text_layer_set_text(s_state_layer, "");
+  }
 }
 
 static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
@@ -93,6 +100,13 @@ static void window_load(Window *window) {
   text_layer_set_text_alignment(s_timestamp_layer, GTextAlignmentLeft);
   layer_add_child(s_draw_layer, text_layer_get_layer(s_timestamp_layer));
 
+  s_state_layer = text_layer_create(GRect(s_bounds.size.w - 53, get_y(S_Y_STATE), 50, 16));
+  text_layer_set_background_color(s_state_layer, GColorClear);
+  text_layer_set_text_color(s_state_layer, GColorBlack);
+  text_layer_set_font(s_state_layer, fonts_get_system_font(FONT_KEY_GOTHIC_14));
+  text_layer_set_text_alignment(s_state_layer, GTextAlignmentRight);
+  layer_add_child(s_draw_layer, text_layer_get_layer(s_state_layer));
+
   s_date_layer = text_layer_create(GRect(3, get_y(S_Y_DATE), s_bounds.size.w - 6, 20));
   text_layer_set_background_color(s_date_layer, GColorClear);
   text_layer_set_text_color(s_date_layer, GColorBlack);
@@ -122,6 +136,7 @@ static void window_unload(Window *window) {
   text_layer_destroy(s_day_layer);
   text_layer_destroy(s_time_layer);
   text_layer_destroy(s_timestamp_layer);
+  text_layer_destroy(s_state_layer);
   layer_destroy(s_draw_layer);
 }
 
@@ -139,6 +154,10 @@ static void init(void) {
     .change = unobstructed_change,
   };
   unobstructed_area_service_subscribe(unobstruct_handler, NULL);
+
+  connection_service_subscribe((ConnectionHandlers) {
+    .pebble_app_connection_handler = bluetooth_callback,
+  });
 }
 
 static void deinit(void) {
