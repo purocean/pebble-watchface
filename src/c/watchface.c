@@ -28,7 +28,13 @@ static int16_t get_y(int16_t y) {
   }
 }
 
-static void update_time() {
+static void battery_state_handler(BatteryChargeState charge) {
+    static char percent_buff[5];
+    snprintf(percent_buff, sizeof(percent_buff), "%d%%", (int) charge.charge_percent);
+    text_layer_set_text(s_state_layer, percent_buff);
+}
+
+static void update() {
   time_t timestamp = time(NULL);
   struct tm *tick_time = localtime(&timestamp);
 
@@ -47,6 +53,8 @@ static void update_time() {
   static char timestamp_buffer[13];
   snprintf(timestamp_buffer, sizeof(timestamp_buffer), "%d", (int) timestamp);
   text_layer_set_text(s_timestamp_layer, timestamp_buffer);
+
+  battery_state_handler(battery_state_service_peek());
 }
 
 static void update_offset() {
@@ -67,13 +75,11 @@ static void bluetooth_callback(bool connected) {
   if (!connected) {
     vibes_long_pulse();
     text_layer_set_text(s_state_layer, "EC");
-  } else {
-    text_layer_set_text(s_state_layer, "");
   }
 }
 
 static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
-  update_time();
+  update();
 }
 
 static void unobstructed_change(AnimationProgress progress, void *context) {
@@ -100,7 +106,7 @@ static void window_load(Window *window) {
   text_layer_set_text_alignment(s_timestamp_layer, GTextAlignmentLeft);
   layer_add_child(s_draw_layer, text_layer_get_layer(s_timestamp_layer));
 
-  s_state_layer = text_layer_create(GRect(s_bounds.size.w - 53, get_y(S_Y_STATE), 50, 16));
+  s_state_layer = text_layer_create(GRect(s_bounds.size.w - 103, get_y(S_Y_STATE), 100, 16));
   text_layer_set_background_color(s_state_layer, GColorClear);
   text_layer_set_text_color(s_state_layer, GColorBlack);
   text_layer_set_font(s_state_layer, fonts_get_system_font(FONT_KEY_GOTHIC_14));
@@ -128,7 +134,7 @@ static void window_load(Window *window) {
   text_layer_set_text_alignment(s_time_layer, GTextAlignmentCenter);
   layer_add_child(s_draw_layer, text_layer_get_layer(s_time_layer));
 
-  update_time();
+  update();
 }
 
 static void window_unload(Window *window) {
