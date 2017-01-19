@@ -34,6 +34,32 @@ static void battery_state_handler(BatteryChargeState charge) {
     text_layer_set_text(s_state_layer, percent_buff);
 }
 
+static void vibes(tm *tick_time) {
+  if (tick_time->tm_hour >= 23 || tick_time->tm_hour < 8) {
+    return;
+  }
+
+  if (tick_time->tm_min == 0 ) {
+    const uint32_t const segments[] = {700, 300, 700, 300, 700};
+    vibes_enqueue_custom_pattern((VibePattern) {
+      .durations = segments,
+      .num_segments = ARRAY_LENGTH(segments),
+    });
+  } else if (tick_time->tm_min == 30 ) {
+    const uint32_t const segments[] = {700, 300, 700};
+    vibes_enqueue_custom_pattern((VibePattern) {
+      .durations = segments,
+      .num_segments = ARRAY_LENGTH(segments),
+    });
+  } else if (tick_time->tm_min % 15 == 0 ) {
+    const uint32_t const segments[] = {700};
+    vibes_enqueue_custom_pattern((VibePattern) {
+      .durations = segments,
+      .num_segments = ARRAY_LENGTH(segments),
+    });
+  }
+}
+
 static void update() {
   time_t timestamp = time(NULL);
   struct tm *tick_time = localtime(&timestamp);
@@ -55,6 +81,8 @@ static void update() {
   text_layer_set_text(s_timestamp_layer, timestamp_buffer);
 
   battery_state_handler(battery_state_service_peek());
+
+  vibes(tick_time);
 }
 
 static void update_offset() {
