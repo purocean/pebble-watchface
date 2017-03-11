@@ -40,13 +40,13 @@ static void vibes(tm *tick_time) {
   }
 
   if (tick_time->tm_min == 0 ) {
-    const uint32_t const segments[] = {700, 300, 700, 300, 700};
+    const uint32_t const segments[] = {700, 200, 500, 100, 200};
     vibes_enqueue_custom_pattern((VibePattern) {
       .durations = segments,
       .num_segments = ARRAY_LENGTH(segments),
     });
   } else if (tick_time->tm_min == 30 ) {
-    const uint32_t const segments[] = {700, 300, 700};
+    const uint32_t const segments[] = {500, 200, 500};
     vibes_enqueue_custom_pattern((VibePattern) {
       .durations = segments,
       .num_segments = ARRAY_LENGTH(segments),
